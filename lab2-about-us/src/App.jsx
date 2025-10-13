@@ -4,9 +4,9 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import { far } from "@fortawesome/free-regular-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { MainLayout } from "./layout/MainLayout";
 import { About } from "./components/About";
 import { SomethingList } from "./components/SomethingList";
+import { MainLayout } from "./layout";
 
 library.add(fas, far, fab);
 
