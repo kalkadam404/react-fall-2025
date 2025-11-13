@@ -2,10 +2,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 export function Sidebar() {
   return (
-    <div className="w-[30%] bg-[#494949] p-9 flex flex-col justify-between fixed top-0 left-0 h-screen max-sm:hidden">
+    <div className="w-[20%] bg-[#494949] p-9 flex flex-col justify-between fixed top-0 left-0 h-screen max-sm:hidden">
       <div className="flex flex-col gap-3 text-2xl uppercase text-white font-bold border-t-2 border-white   p-2">
-        <Link to="/">about me</Link>
-        <Link to="/something">Vacancies</Link>
+        <Link to={"/"}>Home </Link>
+        <Link to="/about">about me</Link>
+        <Link to="/movies">Movie List</Link>
+        <Link to="/login">Login</Link>
       </div>
 
       <div className="flex flex-col gap-4 text-white">
