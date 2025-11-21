@@ -1,89 +1,82 @@
-import React from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { auth } from "../firebase";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
 
 export function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/profile");
+    }
+  }, [user, navigate]);
+  const login = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    signInWithEmailAndPassword(auth, email, password)
+      .then((user) => {
+        console.log(user);
+        setEmail("");
+        setPassword("");
+        setError("");
+        navigate("/profile");
+      })
+      .catch((error) => {
+        console.log(error.message);
+        setError("SORRY, COULDN'T FIND YOUR ACCOUNT");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-sky-50 p-6">
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl p-8">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-sky-400 rounded-xl shadow-md">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-white"
-            >
-              <path
-                d="M7 10V7a5 5 0 0110 0v3"
-                stroke="white"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <rect
-                x="3"
-                y="10"
-                width="18"
-                height="11"
-                rx="2"
-                stroke="white"
-                strokeWidth="1.6"
-              />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-800">Login</h1>
-            <p className="text-sm text-slate-500">
-              A simple placeholder page while auth is being prepared
-            </p>
-          </div>
+    <>
+      <div className="relative bg-[#191E2E] size-full flex flex-col items-center justify-center  gap-5 py-9 ">
+        <div className="text-white font-bold text-4xl max-sm:text-2xl">
+          Войти
         </div>
 
-        <div className="space-y-4">
-          <div className="rounded-lg p-4 bg-slate-50 border border-dashed border-slate-200">
-            <h2 className="text-lg font-medium text-slate-700">
-              Auth to be added
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              We&apos;re working on signing you in. Meanwhile, this page shows
-              where the authentication form will appear.
-            </p>
-          </div>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          placeholder="Plese enter your email"
+          className="bg-[#1E2538] text-white placeholder-gray-500 pl-7 w-96 py-4 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-[#F2F60F] transition-all max-sm:w-72 max-sm:text-base"
+        />
 
-          <div className="grid gap-3">
-            <input
-              disabled
-              placeholder="Email (coming soon)"
-              className="w-full px-4 py-3 rounded-md bg-white border border-slate-200 text-slate-700 placeholder:text-slate-400"
-            />
-            <input
-              disabled
-              placeholder="Password (coming soon)"
-              type="password"
-              className="w-full px-4 py-3 rounded-md bg-white border border-slate-200 text-slate-700 placeholder:text-slate-400"
-            />
-            <button
-              disabled
-              className="w-full py-3 rounded-md bg-gradient-to-r from-indigo-400 to-sky-400 text-white font-medium shadow-md opacity-60 cursor-not-allowed"
-            >
-              Sign in (coming soon)
-            </button>
-          </div>
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+          placeholder="Please enter your password"
+          className="bg-[#1E2538] text-white placeholder-gray-500 pl-7 w-96 py-4 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-[#F2F60F] transition-all max-sm:w-72 max-sm:text-base"
+        />
 
-          <div className="mt-3 text-center text-sm text-slate-500">
-            <span>Prefer to try the app? </span>
-            <span className="font-medium text-slate-700">
-              Demo mode available
-            </span>
-          </div>
-        </div>
+        <button
+          onClick={login}
+          disabled={loading}
+          className="bg-[#F2F60F] py-4 w-96 rounded-xl text-lg text-[#191E2E] font-bold hover:bg-yellow-400 transition-all max-sm:w-72 max-sm:text-base disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "loading..." : "Login"}
+        </button>
+        {error && (
+          <p className="text-red-500 font-semibold max-sm:text-sm">{error}</p>
+        )}
 
-        <div className="mt-6 text-xs text-center text-slate-400">
-          Need this wired to your router? I can add a proper route (React Router
-          / Next.js) and real auth when you're ready.
-        </div>
+        <Link to="/signup">
+          <button className="bg-[#1E2538] py-4 w-96 text-white rounded-xl text-lg hover:bg-[#252E42] transition-all max-sm:w-72 max-sm:text-base">
+            Sign Up
+          </button>
+        </Link>
       </div>
-    </div>
+    </>
   );
 }

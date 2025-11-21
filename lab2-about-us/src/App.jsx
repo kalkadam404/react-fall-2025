@@ -10,21 +10,28 @@ import Home from "./components/Home";
 import { Login } from "./components/Login";
 import { MovieList } from "./components/MovieList";
 import { MovieDetail } from "./components/MovieDetail";
+import { SignUp } from "./components/SignUp";
+import { ProfilePage } from "./components/Profile";
+import AuthProvider from "./context/AuthProvider";
 
 library.add(fas, far, fab);
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/movies" element={<MovieList />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/movie/:movie_id" element={<MovieDetail />} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/movies" element={<MovieList />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/movie/:movie_id" element={<MovieDetail />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
