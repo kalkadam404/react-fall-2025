@@ -1,43 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Spinner } from "./Spinner";
-import {
-  fetchMovieDetails,
-  fetchMovieTrailers,
-} from "../services/itemsService";
+import { useDispatch, useSelector } from "react-redux";
+import { loadMovieDetails } from "../features/items/movieSlice";
 
 export function MovieDetail() {
   const { movie_id } = useParams();
   const navigate = useNavigate();
-  const [movie, setMovie] = useState({});
-  const [movieTrailers, setMovieTrailers] = useState([]);
-  const [randomTrailerKey, setRandomTrailerKey] = useState("");
-  const [trailerMessage, setTrailerMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { movie, trailerKey, loading, error } = useSelector((s) => s.movies);
 
+  const loadData = () => {
+    dispatch(loadMovieDetails(movie_id));
+  };
   useEffect(() => {
-    async function loadData() {
-      try {
-        const movieData = await fetchMovieDetails(movie_id);
-        const trailers = await fetchMovieTrailers(movie_id);
-
-        setMovie(movieData);
-
-        if (trailers.length > 0) {
-          const randomIndex = Math.floor(Math.random() * trailers.length);
-          setRandomTrailerKey(trailers[randomIndex].key);
-          setTrailerMessage("Смотреть трейлер");
-        } else {
-          setRandomTrailerKey(null);
-          setTrailerMessage("Трейлер пока недоступен");
-        }
-      } catch (err) {
-        console.error("Ошибка при загрузке фильма:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadData();
   }, [movie_id]);
 
@@ -72,7 +48,44 @@ export function MovieDetail() {
     return `${day} ${month} ${year}`;
   };
 
-  if (loading) return <Spinner />;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-20 text-white">
+        <h1 className="text-3xl font-bold text-black">Ошибка загрузки</h1>
+        <p className="text-gray-300">{error}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-4 py-2 bg-white text-black rounded-lg"
+        >
+          ← Назад
+        </button>
+      </div>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <div className="flex flex-col items-center py-20 text-black gap-3">
+        <h1 className="text-3xl font-bold">Фильм не найден</h1>
+        <p className="text-gray-300">Возможно, он был удалён или недоступен.</p>
+
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-4 py-2 bg-white text-black rounded-lg"
+        >
+          ← Назад
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-9 justify-center py-14 px-10  bg-[#1e2538] bg-[url('/bg.png')] bg-cover bg-center bg-fixed">
@@ -239,7 +252,7 @@ export function MovieDetail() {
             <img src="/arrow_next.svg" alt="arrowNext" />
           </div>
         </div>
-        {randomTrailerKey ? (
+        {trailerKey ? (
           <div
             className="mt-10 relative w-full overflow-hidden"
             style={{
@@ -248,7 +261,7 @@ export function MovieDetail() {
           >
             <iframe
               className="absolute top-0 left-0 w-full h-full rounded-lg"
-              src={`https://www.youtube.com/embed/${randomTrailerKey}`}
+              src={`https://www.youtube.com/embed/${trailerKey}`}
               loading="lazy"
               frameBorder="0"
               allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"

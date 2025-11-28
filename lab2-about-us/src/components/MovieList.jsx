@@ -1,55 +1,39 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import movieGenre from "../constants/genre";
 import { MovieCard } from "./MovieCard";
 import { Spinner } from "./Spinner";
 import { ErrorBox } from "./ErrorBox";
 import { EmptyState } from "./EmptyState";
-import { fetchMovies, searchMovies } from "../services/itemsService";
 import { useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  loadMovies,
+  setGenre,
+  setSearch,
+  toggleShowAll,
+} from "../features/items/movieSlice";
 
 export function MovieList() {
-  // const debouncedSearch = useDebounce(searchTerm, 500);
-  const [movies, setMovies] = useState([]);
-  const [selectedGenre, setSelectedGenre] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [showAllMovies, setShowAllMovies] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const queryParam = searchParams.get("q") || "";
-  const [search, setSearch] = useState(queryParam);
+  const dispatch = useDispatch();
+  const { movies, selectedGenre, search, loading, error, showAllMovies } =
+    useSelector((state) => state.movies);
   const debouncedSearch = useDebounce(search, 500);
-
-  const loadMovies = async () => {
-    setLoading(true);
-    try {
-      let fetchedMovies = [];
-      if (debouncedSearch) {
-        fetchedMovies = await searchMovies(debouncedSearch);
-      } else {
-        fetchedMovies = await fetchMovies(selectedGenre);
-      }
-      setMovies(fetchedMovies);
-      setError("");
-    } catch (error) {
-      setError("Ошибка:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearch(value);
-    setSearchParams(value ? { q: value } : {});
-  };
-  const changeGenre = (genreId) => {
-    setSelectedGenre(genreId);
-  };
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    loadMovies();
+    dispatch(loadMovies({ search: debouncedSearch, genre: selectedGenre }));
   }, [selectedGenre, debouncedSearch]);
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    dispatch(setSearch(value));
+    setSearchParams(value ? { q: value } : {});
+  };
+
+  const changeGenre = (genreId) => {
+    dispatch(setGenre(genreId));
+  };
 
   if (loading) return <Spinner />;
   if (error) return <ErrorBox message={error} />;
@@ -110,7 +94,7 @@ export function MovieList() {
 
           {!loading && (
             <button
-              onClick={() => setShowAllMovies((prev) => !prev)}
+              onClick={() => dispatch(toggleShowAll())}
               className="cursor-pointer mt-8 border-2 border-white py-3 px-5 w-52 rounded-lg text-center text-white text-base m-auto block hover:bg-white hover:text-black transition"
             >
               {showAllMovies ? "Скрыть новинки" : "Все новинки"}
